@@ -4,15 +4,14 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build:frontend": "tsc -p tsconfig.f.json && tsc-alias -p tsconfig.f.json",
+    "build:frontend": "tsc -p tsconfig.f.json",
     "build:backend": "tsc -p tsconfig.b.json",
     "build": "yarn build:frontend && yarn build:backend",
     "start": "node dist/backend/server.js",
-    "dev": "tsc -p tsconfig.f.json && tsc-alias -p tsconfig.f.json && ts-node-dev --project tsconfig.b.json src/backend/server.ts"
+    "dev": "tsc -p tsconfig.f.json && ts-node-dev --project tsconfig.b.json src/backend/server.ts"
   },
   "devDependencies": {
     "ts-node-dev": "^2.0.0",
-    "tsc-alias": "^1.8.16",
     "typescript": "^5.8.3"
   },
   "dependencies": {

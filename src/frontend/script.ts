@@ -90,6 +90,7 @@ game.entities.forEach(entity => {
   
   entity.movementSubscribe((data) => {
     if (!data.endMovement || data.isGravity) return
+    
     gravity.checkSpecificFallCondition(data.entity)
   })
 

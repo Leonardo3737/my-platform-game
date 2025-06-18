@@ -37,8 +37,7 @@ export class Gravity {
   checkSpecificFallCondition(entity1: Entity) {
     if (!entity1.usesGravity) return
 
-    const collisionType = this.collider.getEntityState(entity1.id)
-
+    const collisionType = this.collider.getEntityState(entity1.id)   
 
     if (this.isToFall(collisionType)) {
       this.pushDown(entity1)

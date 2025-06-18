@@ -1,4 +1,4 @@
-import { Collisions } from "../enum/Collisions.js";
+import { CollisionsType } from "../types/CollisionsType.js";
 import { DirectionType } from "../types/DirectionType.js";
 import { EntityType } from "../types/EntityType.js";
 import { MeassureType } from "../types/MeassureType.js";
@@ -6,7 +6,7 @@ import { MoveEntityData } from "../types/MoveEntityData.js";
 
 let entityIdCounter = 1;
 
-export class Entity {
+export abstract class Entity {
   id: number
   body: CanvasRenderingContext2D
   position: MeassureType
@@ -14,7 +14,7 @@ export class Entity {
   color: string
   type: EntityType
   movementObserves: ((data: MoveEntityData)=>void)[] = []
-  collisions: Record<DirectionType, any[]> = { top: [], right: [], bottom: [], left: [] };
+  collisions: CollisionsType = { top: [], right: [], bottom: [], left: [] };
   usesGravity: boolean
   isSuspended: boolean = false // remover depois
 
@@ -76,11 +76,5 @@ export class Entity {
     this.body.fillRect(positionX, positionY, sizeX, sizeY)
   }
 
-  canMove(direction: DirectionType) {
-    const collidedObject = this.collisions[direction].find(c => c.collisionType === Collisions.CONTACT || c.collisionType === Collisions.IMPACT)
-    const isMovableObject = collidedObject?.target.type === 'movable-object'
-    console.log(this.collisions[direction]);
-    
-    return !collidedObject || isMovableObject
-  }
+  abstract canMove(direction: DirectionType): boolean
 }

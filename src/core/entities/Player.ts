@@ -1,3 +1,4 @@
+import { Collisions } from "../enum/Collisions.js"
 import { DirectionType } from "../types/DirectionType.js"
 import { MeassureType } from "../types/MeassureType.js"
 import { Entity } from "./Entity.js"
@@ -62,12 +63,14 @@ export class Player extends Entity {
         const movement = movements[direction]
         this.hide()
         this.position = movement
-        this.notifyMovement({direction, endMovement: false})
         walkFrame++
+        this.notifyMovement({direction, endMovement: false})
       } else {
-        this.notifyMovement({direction})
+        console.log(walkFrame);
+        this.notifyMovement({direction, endMovement: true})
         clearInterval(intervalId)
       }
+      
       updateScreen()
     }, 5)
   }
@@ -89,9 +92,16 @@ export class Player extends Entity {
         clearInterval(intervalId)
       }
       const direction = jumpFrame === totalFrames ? 'bottom' : 'top'
+      
       this.notifyMovement({direction: 'top', endMovement: jumpFrame === totalFrames})
       updateScreen()
     }, 10)
+  }
+
+  canMove(direction: DirectionType) {
+    const collidedObject = this.collisions[direction].find(c => c.collisionType === Collisions.CONTACT || c.collisionType === Collisions.IMPACT)
+    const isMovableObject = collidedObject?.target.type === 'movable-object'    
+    return !collidedObject || isMovableObject
   }
 
 }

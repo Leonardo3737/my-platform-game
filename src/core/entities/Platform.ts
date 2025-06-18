@@ -23,5 +23,9 @@ export class Platform extends Entity {
       'platform',
       false
     )
+
+  }
+  canMove() {
+    return false
   }
 }

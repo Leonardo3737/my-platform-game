@@ -25,8 +25,6 @@ export class Game {
   }
 
   updateScreen() {
-    /* console.log('renderizando player'); */
-
     this.player.render()
     this.entities.forEach(entity => {
       entity.render()
@@ -60,16 +58,16 @@ export class Game {
 
     const movement = entity.movements[direction]
 
-    if (isGravity || !(entity instanceof Player)) {
-      this.updateScreen()
+    if (isGravity) {
+      movement(() => this.updateScreen())
+      //this.updateScreen()
       return
     }
 
     const collidedObject = entity.collisions[direction].find(c => c.collisionType === Collisions.CONTACT || c.collisionType === Collisions.IMPACT)
     const isMovableObject = collidedObject?.target.type === 'movable-object'
 
-    if (entity.collisions[direction].length && !isMovableObject && !collidedObject.target?.canMove(direction)) {
-      console.log(entity.collisions[direction]);
+    if ((entity.collisions[direction].length && !isMovableObject) || (collidedObject && !collidedObject.target?.canMove(direction))) {
       return
     }
 
@@ -80,10 +78,10 @@ export class Game {
     const collision = collisions[direction]
     if (collision instanceof Array && collision.length) {
       collision.map(c => {
-        console.log(c);
-
+        
         if (c.target.type === 'movable-object' && c.collisionType !== Collisions.CONTACT) {
-
+          console.log('mandando mover: ', collider.id);
+          
           this.moveEntity({
             entity: c.target,
             direction,
