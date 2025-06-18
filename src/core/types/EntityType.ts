@@ -1,0 +1,1 @@
+export type EntityType = 'object' | 'player' | 'platform' | 'movable-object'

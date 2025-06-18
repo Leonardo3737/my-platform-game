@@ -1,0 +1,16 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 100dvw;
+  height: 100dvh;
+  display: flex;
+}
+
+#screen-game {
+  border: 2px solid black;
+  margin: auto;
+}
