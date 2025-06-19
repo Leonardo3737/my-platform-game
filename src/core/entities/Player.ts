@@ -12,7 +12,7 @@ export class Player extends Entity {
   movements: Record<DirectionType, Function> = {
     top: (updateScreen: Function) => this.jump(updateScreen),
     left: (updateScreen: Function) => this.walk('left', updateScreen),
-    bottom: (updateScreen: Function) => {},
+    bottom: (updateScreen: Function) => { },
     right: (updateScreen: Function) => this.walk('right', updateScreen),
   }
 
@@ -60,17 +60,16 @@ export class Player extends Entity {
           bottom: { ...this.position, y: this.position.y + this.velocity },
           right: { ...this.position, x: this.position.x + this.velocity },
         }
-        const movement = movements[direction]
+        const movement = movements[ direction ]
         this.hide()
         this.position = movement
         walkFrame++
-        this.notifyMovement({direction, endMovement: false})
+        this.notifyMovement({ direction, endMovement: false })
       } else {
-        console.log(walkFrame);
-        this.notifyMovement({direction, endMovement: true})
+        this.notifyMovement({ direction, endMovement: true })
         clearInterval(intervalId)
       }
-      
+
       updateScreen()
     }, 5)
   }
@@ -92,15 +91,15 @@ export class Player extends Entity {
         clearInterval(intervalId)
       }
       const direction = jumpFrame === totalFrames ? 'bottom' : 'top'
-      
-      this.notifyMovement({direction: 'top', endMovement: jumpFrame === totalFrames})
+
+      this.notifyMovement({ direction: 'top', endMovement: jumpFrame === totalFrames })
       updateScreen()
     }, 10)
   }
 
   canMove(direction: DirectionType) {
-    const collidedObject = this.collisions[direction].find(c => c.collisionType === Collisions.CONTACT || c.collisionType === Collisions.IMPACT)
-    const isMovableObject = collidedObject?.target.type === 'movable-object'    
+    const collidedObject = this.collisions[ direction ].find(c => c.collisionType === Collisions.CONTACT || c.collisionType === Collisions.IMPACT)
+    const isMovableObject = collidedObject?.target.type === 'movable-object'
     return !collidedObject || isMovableObject
   }
 

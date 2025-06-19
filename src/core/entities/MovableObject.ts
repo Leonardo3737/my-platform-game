@@ -32,10 +32,7 @@ export class MovableObject extends Entity {
     this.hide()
 
     let moveFrame = 0
-    const totalFrames = 10
-
-    console.log('andando');
-    
+    const totalFrames = 5
 
     const intervalId = setInterval(() => {
       if (moveFrame < totalFrames) {
@@ -45,7 +42,7 @@ export class MovableObject extends Entity {
           bottom: { ...this.position },
           top: { ...this.position },
         }
-        const movement = movements[direction]
+        const movement = movements[ direction ]
         this.hide()
         this.position = movement || this.position
         this.notifyMovement({ direction, endMovement: false })
@@ -59,7 +56,7 @@ export class MovableObject extends Entity {
   }
 
   canMove(direction: DirectionType) {
-    const collidedObject = this.collisions[direction].find(c => c.collisionType === Collisions.CONTACT || c.collisionType === Collisions.IMPACT)
+    const collidedObject = this.collisions[ direction ].find(c => c.collisionType === Collisions.CONTACT || c.collisionType === Collisions.IMPACT)
     const isMovableObject = collidedObject?.target.type === 'movable-object'
     return !collidedObject || isMovableObject
   }

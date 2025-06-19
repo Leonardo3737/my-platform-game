@@ -43,7 +43,7 @@ export class Game {
       S: 'bottom',
       D: 'right',
     }
-    const direction = keyMap[key]
+    const direction = keyMap[ key ]
 
     if (direction) {
       this.moveEntity({
@@ -56,7 +56,7 @@ export class Game {
   moveEntity(data: MoveEntityData) {
     const { entity, direction, endMovement, isGravity } = data
 
-    const movement = entity.movements[direction]
+    const movement = entity.movements[ direction ]
 
     if (isGravity) {
       movement(() => this.updateScreen())
@@ -64,10 +64,19 @@ export class Game {
       return
     }
 
-    const collidedObject = entity.collisions[direction].find(c => c.collisionType === Collisions.CONTACT || c.collisionType === Collisions.IMPACT)
+    const collidedObject = entity.collisions[ direction ].find(c => c.collisionType === Collisions.CONTACT || c.collisionType === Collisions.IMPACT)
     const isMovableObject = collidedObject?.target.type === 'movable-object'
 
-    if ((entity.collisions[direction].length && !isMovableObject) || (collidedObject && !collidedObject.target?.canMove(direction))) {
+    if (entity.collisions[ direction ].length && !isMovableObject) {
+      return
+    }
+
+    collidedObject?.target.notifyMovement({
+      direction,
+      endMovement: true
+    })
+
+    if (collidedObject && !collidedObject.target?.canMove(direction)) {
       return
     }
 
@@ -75,13 +84,13 @@ export class Game {
   }
 
   notifyCollision(collider: Entity, direction: DirectionType, collisions: CollisionsType) {
-    const collision = collisions[direction]
+    const collision = collisions[ direction ]
     if (collision instanceof Array && collision.length) {
       collision.map(c => {
-        
+
         if (c.target.type === 'movable-object' && c.collisionType !== Collisions.CONTACT) {
           console.log('mandando mover: ', collider.id);
-          
+
           this.moveEntity({
             entity: c.target,
             direction,

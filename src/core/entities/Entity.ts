@@ -13,7 +13,7 @@ export abstract class Entity {
   size: MeassureType
   color: string
   type: EntityType
-  movementObserves: ((data: MoveEntityData)=>void)[] = []
+  movementObserves: ((data: MoveEntityData) => void)[] = []
   collisions: CollisionsType = { top: [], right: [], bottom: [], left: [] };
   usesGravity: boolean
   isSuspended: boolean = false // remover depois
@@ -22,8 +22,8 @@ export abstract class Entity {
 
   get area() {
     return {
-      x: [this.position.x, this.position.x + this.size.x],
-      y: [this.position.y, this.position.y + this.size.y]
+      x: [ this.position.x, this.position.x + this.size.x ],
+      y: [ this.position.y, this.position.y + this.size.y ]
     }
   }
 
@@ -44,12 +44,14 @@ export abstract class Entity {
     this.id = entityIdCounter++
   }
 
-  movementSubscribe(event: (data: MoveEntityData)=> void) {
+  movementSubscribe(event: (data: MoveEntityData) => void) {
     this.movementObserves.push(event)
   }
 
   notifyMovement(data: Omit<MoveEntityData, 'entity'>) {
-    this.movementObserves.forEach(callback => callback({...data, entity: this}))
+    console.log(`Entity ${this.id} notificando`);
+
+    this.movementObserves.forEach(callback => callback({ ...data, entity: this }))
   }
 
   hide() {
