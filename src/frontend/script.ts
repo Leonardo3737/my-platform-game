@@ -1,4 +1,5 @@
 import { ScreenSize } from "../core/constants/ScreenSize.js"
+import { Enemy } from "../core/entities/Enemy.js"
 import { MovableEntity } from "../core/entities/MovableEntity.js"
 import { MovableObject } from "../core/entities/MovableObject.js"
 import { Platform } from "../core/entities/Platform.js"
@@ -54,9 +55,15 @@ const player = new Player(
   { x: 6, y: 10 }
 )
 
-const block = new MovableObject(
+const enemy = new Enemy(
   genericBody,
   { x: 40, y: 100 },
+  { x: 6, y: 6 }
+)
+
+const block = new MovableObject(
+  genericBody,
+  { x: 80, y: 100 },
   { x: 6, y: 6 }
 )
 const block1 = new MovableObject(
@@ -83,6 +90,7 @@ const game = new Game(
   player,
 )
 
+game.addEntity(enemy)
 game.addEntity(block)
 game.addEntity(block1)
 game.addEntity(block2)

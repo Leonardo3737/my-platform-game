@@ -10,11 +10,11 @@ export class Player extends MovableEntity {
   points = 0
   isJumping = false
 
-  movements: Record<DirectionType, Function> = {
-    top: (updateScreen: Function) => this.jump(updateScreen),
-    left: (updateScreen: Function) => this.walk('left', updateScreen),
-    bottom: (updateScreen: Function) => { },
-    right: (updateScreen: Function) => this.walk('right', updateScreen),
+  movements = {
+    top: () => this.jump(),
+    left: () => this.walk('left'),
+    bottom: () => { },
+    right: () => this.walk('right'),
   }
 
   movementPositions = {
@@ -33,12 +33,12 @@ export class Player extends MovableEntity {
       body,
       position,
       size,
-      '#ff0000',
+      '#00B7EB',
       'player',
     )
   }
 
-  walk(direction: DirectionType, updateScreen: Function) {
+  walk(direction: DirectionType) {
     const movements = {
       top: { ...this.position, y: this.position.y - this.velocity },
       left: { ...this.position, x: this.position.x - this.velocity },
@@ -49,10 +49,10 @@ export class Player extends MovableEntity {
     this.hide()
     this.position = movement
     this.notifyMovement({ direction, endMovement: true })
-    updateScreen()
+    this.render()
   }
 
-  jump(updateScreen: Function) {
+  jump() {
     if (this.isSuspended || this.isJumping) {      
       return
     }    
@@ -73,7 +73,7 @@ export class Player extends MovableEntity {
       }
 
       this.notifyMovement({ direction: 'top', endMovement: true })
-      updateScreen()
+      this.render()
     }, 10)
   }
 

@@ -1,3 +1,4 @@
+import { Enemy } from "./entities/Enemy.js"
 import { Entity } from "./entities/Entity.js"
 import { MovableEntity } from "./entities/MovableEntity.js"
 import { Platform } from "./entities/Platform.js"
@@ -23,14 +24,20 @@ export class Game {
     this.player = player
     this.entities.push(player)
 
-    this.updateScreen()
+    this.startGame()
+  }
+
+  startGame() {
+    setInterval(()=> this.updateScreen(), 10)
   }
 
   updateScreen() {
-    this.player.render()
+    this.player.hide()
     this.entities.forEach(entity => {
+      entity.hide()
       entity.render()
     })
+    this.player.render()
   }
 
   addEntity(entity: Entity) {
@@ -60,8 +67,10 @@ export class Game {
 
     const movement = entity.movements[direction]
 
+    entity.lastPosition = {...entity.position}
+
     if (isGravity) {
-      movement(() => this.updateScreen())
+      movement()
       //this.updateScreen()
       return
     }
@@ -86,7 +95,7 @@ export class Game {
 
     if(!mayMove) return
 
-    movement(() => this.updateScreen())
+    movement()
   }
 
   notifyCollision(collider: Entity, direction: DirectionType, collisions: CollisionsType) {
@@ -94,6 +103,7 @@ export class Game {
     const collision = collisions[direction]
     if (collision instanceof Array && collision.length) {
       collision.map(c => {
+
         if (c.target instanceof MovableEntity && c.target.type === 'movable-object' && c.collisionType !== Collisions.CONTACT) {
           this.moveEntity({
             entity: c.target,
@@ -101,6 +111,23 @@ export class Game {
             endMovement: true,
           })
         }
+
+        if(direction === 'bottom' && c.target instanceof Enemy && collider instanceof Player) {
+          c.target.sufferDamage()
+          if(!c.target.life) {
+            const index = this.entities.findIndex(e => e.id === c.target.id)
+            delete this.entities[index]
+            console.log('morreu');
+          }
+          console.log(c.target.life);
+
+        }
+
+        if((direction === 'left' || direction === 'right') && c.target instanceof Player && collider instanceof Enemy) {
+          c.target.life = c.target.life - collider.damage
+          console.log("Dano sofrido, vida: ", c.target.life);          
+        }
+        
       })
     }
     //console.log("o " + collider + " "+ collision + " no " + target.type);

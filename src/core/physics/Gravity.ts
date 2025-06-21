@@ -84,13 +84,14 @@ export class Gravity {
         }
 
         entity.hide();
+        entity.lastPosition = {...entity.position}
         entity.position = { ...entity.position, y: entity.position.y + this.velocity };
         entity.notifyMovement({
           direction: 'bottom',
           endMovement: true,
           isGravity: true
         });
-        this.game.updateScreen();
+        entity.render()
 
         setTimeout(fallLoop, auxVelocity); // Chamada recursiva com intervalo atualizado
       } else {

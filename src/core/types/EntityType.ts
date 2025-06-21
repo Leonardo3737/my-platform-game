@@ -1,1 +1,1 @@
-export type EntityType = 'object' | 'player' | 'platform' | 'movable-object'
+export type EntityType = 'object' | 'player' | 'platform' | 'movable-object' | 'enemy'

@@ -5,10 +5,12 @@ import { MeassureType } from "../types/MeassureType.js";
 import { MoveEntityData } from "../types/MoveEntityData.js";
 import { Entity } from "./Entity.js";
 
-export class MovableEntity extends Entity {
+export abstract class MovableEntity extends Entity {
   movementObserves: ((data: MoveEntityData) => void)[] = []
-  movements: Record<DirectionType, Function> = {} as Record<DirectionType, Function>
   velocity = 1 // 10
+  lastPosition: MeassureType
+
+  abstract movements: Record<DirectionType, ()=>void>
 
   constructor(
     body: CanvasRenderingContext2D,
@@ -26,6 +28,7 @@ export class MovableEntity extends Entity {
       type,
       usesGravity
     )
+    this.lastPosition = { ...position }
   }
 
   canMove(direction: DirectionType) {
@@ -51,6 +54,15 @@ export class MovableEntity extends Entity {
     })
     return mayMove
   }
+
+ /*  hide() {
+    this.body.clearRect(
+      this.lastPosition.x,
+      this.lastPosition.y,
+      this.size.x,
+      this.size.y
+    )
+  } */
 
   movementSubscribe(event: (data: MoveEntityData) => void) {
     this.movementObserves.push(event)

@@ -8,8 +8,8 @@ export class MovableObject extends MovableEntity {
   //velocity = 10
 
   movements = {
-    left: (updateScreen: Function) => this.walk('left', updateScreen),
-    right: (updateScreen: Function) => this.walk('right', updateScreen),
+    left: () => this.walk('left'),
+    right: () => this.walk('right'),
     top: () => { },
     bottom: () => { },
   }
@@ -28,7 +28,7 @@ export class MovableObject extends MovableEntity {
     )
   }
 
-  walk(direction: DirectionType, updateScreen: Function) {
+  walk(direction: DirectionType) {
 
     const movements: Record<DirectionType, MeassureType> = {
       left: { ...this.position, x: this.position.x - this.velocity },
@@ -40,7 +40,7 @@ export class MovableObject extends MovableEntity {
     this.hide()
     this.position = movement || this.position
     this.notifyMovement({ direction, endMovement: true })
-    updateScreen()
+    this.render()
   }
 
   canMove(direction: DirectionType) {

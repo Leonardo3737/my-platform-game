@@ -36,6 +36,7 @@ export abstract class Entity {
     usesGravity: boolean
   ) {
     this.position = { x: position.x * 5, y: position.y * 5 }
+    
     this.size = { x: size.x * 5, y: size.y * 5 }
     this.body = body
     this.color = color
@@ -43,14 +44,6 @@ export abstract class Entity {
     this.usesGravity = usesGravity
     this.id = entityIdCounter++
   }
-
-  /* movementSubscribe(event: (data: MoveEntityData) => void) {
-    this.movementObserves.push(event)
-  }
-
-  notifyMovement(data: Omit<MoveEntityData, 'entity'>) {
-    this.movementObserves.forEach(callback => callback({ ...data, entity: this }))
-  } */
 
   hide() {
     this.body.clearRect(
