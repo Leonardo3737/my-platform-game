@@ -14,3 +14,10 @@ body {
   border: 2px solid black;
   margin: auto;
 }
+
+#lifebar {
+  display: flex;
+  position: absolute;
+  top: 120px;
+  left: 120px;
+}

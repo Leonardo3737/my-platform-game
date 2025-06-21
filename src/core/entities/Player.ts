@@ -5,10 +5,11 @@ import { Entity } from "./Entity.js"
 import { MovableEntity } from "./MovableEntity.js"
 
 export class Player extends MovableEntity {
-  life = 100
+  life = 5
   //velocity = 10 // 10
   points = 0
   isJumping = false
+  isTakingDamage = false
 
   movements = {
     top: () => this.jump(),
@@ -53,9 +54,8 @@ export class Player extends MovableEntity {
   }
 
   jump() {
-    if (this.isSuspended || this.isJumping) {      
-      return
-    }    
+    if (this.isSuspended || this.isJumping) return
+
     let jumpFrame = 0
     const totalFrames = 20
     this.isSuspended = true

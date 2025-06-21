@@ -4,7 +4,7 @@ import { MovableEntity } from "./MovableEntity.js";
 
 export class Enemy extends MovableEntity {
   life = 2
-  damage = 2
+  damage = 1
 
   movements = {
     top: () => { },
@@ -31,6 +31,7 @@ export class Enemy extends MovableEntity {
   patrol() {
     const walkToDirection = (direction: DirectionType) => new Promise<void>(resolve => {
       let frame = 0
+      let totalFrame = 70
       const idInterval = setInterval(() => {
         if (!this.life) {
           this.hide()
@@ -39,11 +40,11 @@ export class Enemy extends MovableEntity {
         }
         this.walk(direction)
         frame++
-        if (frame > 50) {
+        if (frame > totalFrame) {
           clearInterval(idInterval)
           resolve()
         }
-      }, 20)
+      }, 30)
     })
 
     let aux = true;
