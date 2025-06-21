@@ -1,4 +1,6 @@
 import { Entity } from "./entities/Entity.js"
+import { MovableEntity } from "./entities/MovableEntity.js"
+import { Platform } from "./entities/Platform.js"
 import { Player } from "./entities/Player.js"
 import { Collisions } from "./enum/Collisions.js"
 import { CollisionsType } from "./types/CollisionsType.js"
@@ -43,7 +45,7 @@ export class Game {
       S: 'bottom',
       D: 'right',
     }
-    const direction = keyMap[ key ]
+    const direction = keyMap[key]
 
     if (direction) {
       this.moveEntity({
@@ -56,7 +58,7 @@ export class Game {
   moveEntity(data: MoveEntityData) {
     const { entity, direction, endMovement, isGravity } = data
 
-    const movement = entity.movements[ direction ]
+    const movement = entity.movements[direction]
 
     if (isGravity) {
       movement(() => this.updateScreen())
@@ -64,33 +66,35 @@ export class Game {
       return
     }
 
-    const collidedObject = entity.collisions[ direction ].find(c => c.collisionType === Collisions.CONTACT || c.collisionType === Collisions.IMPACT)
-    const isMovableObject = collidedObject?.target.type === 'movable-object'
+    let mayMove = true
 
-    if (entity.collisions[ direction ].length && !isMovableObject) {
-      return
-    }
+    entity.collisions[direction].forEach(collision => {
+      const collidedObject = collision.target
 
-    collidedObject?.target.notifyMovement({
-      direction,
-      endMovement: true
+      if (!(collidedObject instanceof MovableEntity)) {
+        mayMove = false
+        return
+      }
+      collidedObject.notifyMovement({
+        direction,
+        endMovement: true
+      })
+      if (!collidedObject.canMove(direction)) {
+        mayMove = false
+      }
     })
 
-    if (collidedObject && !collidedObject.target?.canMove(direction)) {
-      return
-    }
+    if(!mayMove) return
 
     movement(() => this.updateScreen())
   }
 
   notifyCollision(collider: Entity, direction: DirectionType, collisions: CollisionsType) {
-    const collision = collisions[ direction ]
+    
+    const collision = collisions[direction]
     if (collision instanceof Array && collision.length) {
       collision.map(c => {
-
-        if (c.target.type === 'movable-object' && c.collisionType !== Collisions.CONTACT) {
-          console.log('mandando mover: ', collider.id);
-
+        if (c.target instanceof MovableEntity && c.target.type === 'movable-object' && c.collisionType !== Collisions.CONTACT) {
           this.moveEntity({
             entity: c.target,
             direction,

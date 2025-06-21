@@ -2,9 +2,10 @@ import { Collisions } from "../enum/Collisions.js"
 import { DirectionType } from "../types/DirectionType.js"
 import { MeassureType } from "../types/MeassureType.js"
 import { Entity } from "./Entity.js"
+import { MovableEntity } from "./MovableEntity.js"
 
-export class MovableObject extends Entity {
-  velocity = 1
+export class MovableObject extends MovableEntity {
+  //velocity = 10
 
   movements = {
     left: (updateScreen: Function) => this.walk('left', updateScreen),
@@ -24,40 +25,28 @@ export class MovableObject extends Entity {
       size,
       '#0000ff',
       'movable-object',
-      true
     )
   }
 
   walk(direction: DirectionType, updateScreen: Function) {
+
+    const movements: Record<DirectionType, MeassureType> = {
+      left: { ...this.position, x: this.position.x - this.velocity },
+      right: { ...this.position, x: this.position.x + this.velocity },
+      bottom: { ...this.position },
+      top: { ...this.position },
+    }
+    const movement = movements[direction]
     this.hide()
-
-    let moveFrame = 0
-    const totalFrames = 5
-
-    const intervalId = setInterval(() => {
-      if (moveFrame < totalFrames) {
-        const movements: Record<DirectionType, MeassureType> = {
-          left: { ...this.position, x: this.position.x - this.velocity },
-          right: { ...this.position, x: this.position.x + this.velocity },
-          bottom: { ...this.position },
-          top: { ...this.position },
-        }
-        const movement = movements[ direction ]
-        this.hide()
-        this.position = movement || this.position
-        this.notifyMovement({ direction, endMovement: false })
-        moveFrame++
-      } else {
-        this.notifyMovement({ direction, endMovement: true })
-        clearInterval(intervalId)
-      }
-      updateScreen()
-    }, 5)
+    this.position = movement || this.position
+    this.notifyMovement({ direction, endMovement: true })
+    updateScreen()
   }
 
   canMove(direction: DirectionType) {
-    const collidedObject = this.collisions[ direction ].find(c => c.collisionType === Collisions.CONTACT || c.collisionType === Collisions.IMPACT)
-    const isMovableObject = collidedObject?.target.type === 'movable-object'
-    return !collidedObject || isMovableObject
+    if(direction === 'top') return false
+    const superCanMove = super.canMove(direction)
+    return superCanMove
   }
+
 }

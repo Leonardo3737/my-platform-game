@@ -71,7 +71,7 @@ export class Collider {
 
     const epsilon = 1
 
-    const isContact = (a: number, b: number) => Math.abs(a - b) <= epsilon
+    const isContact = (a: number, b: number) => Math.abs(a - b) < epsilon
 
     type AreaType = {
       x: number[]

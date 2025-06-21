@@ -22,8 +22,7 @@ export class Platform extends Entity {
       color,
       'platform',
       false
-    )
-
+    )    
   }
   canMove() {
     return false

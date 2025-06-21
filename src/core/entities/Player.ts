@@ -2,12 +2,13 @@ import { Collisions } from "../enum/Collisions.js"
 import { DirectionType } from "../types/DirectionType.js"
 import { MeassureType } from "../types/MeassureType.js"
 import { Entity } from "./Entity.js"
+import { MovableEntity } from "./MovableEntity.js"
 
-export class Player extends Entity {
+export class Player extends MovableEntity {
   life = 100
-  velocity = 1
+  //velocity = 10 // 10
   points = 0
-  isSuspended = false
+  isJumping = false
 
   movements: Record<DirectionType, Function> = {
     top: (updateScreen: Function) => this.jump(updateScreen),
@@ -34,73 +35,50 @@ export class Player extends Entity {
       size,
       '#ff0000',
       'player',
-      true
     )
   }
 
-  /* onKeyPress(keyPress) {
-    const movement = this.movements[keyPress]
-
-    if (movement) {
-      movement()
-    }
-    return !!movement
-  } */
-
   walk(direction: DirectionType, updateScreen: Function) {
+    const movements = {
+      top: { ...this.position, y: this.position.y - this.velocity },
+      left: { ...this.position, x: this.position.x - this.velocity },
+      bottom: { ...this.position, y: this.position.y + this.velocity },
+      right: { ...this.position, x: this.position.x + this.velocity },
+    }
+    const movement = movements[direction]
     this.hide()
-
-    let walkFrame = 0
-    const totalFrames = 5
-    const intervalId = setInterval(() => {
-      if (walkFrame < totalFrames) {
-        const movements = {
-          top: { ...this.position, y: this.position.y - this.velocity },
-          left: { ...this.position, x: this.position.x - this.velocity },
-          bottom: { ...this.position, y: this.position.y + this.velocity },
-          right: { ...this.position, x: this.position.x + this.velocity },
-        }
-        const movement = movements[ direction ]
-        this.hide()
-        this.position = movement
-        walkFrame++
-        this.notifyMovement({ direction, endMovement: false })
-      } else {
-        this.notifyMovement({ direction, endMovement: true })
-        clearInterval(intervalId)
-      }
-
-      updateScreen()
-    }, 5)
+    this.position = movement
+    this.notifyMovement({ direction, endMovement: true })
+    updateScreen()
   }
 
   jump(updateScreen: Function) {
-    if (this.isSuspended) return
-
+    if (this.isSuspended || this.isJumping) {      
+      return
+    }    
     let jumpFrame = 0
     const totalFrames = 20
     this.isSuspended = true
+    this.isJumping = true
 
     const intervalId = setInterval(() => {
-      if (jumpFrame < totalFrames) {
+      if (jumpFrame < totalFrames && this.canMove('top')) {
         this.hide()
         this.position = { ...this.position, y: this.position.y - 2 }
         jumpFrame++
       }
       else {
         clearInterval(intervalId)
+        this.isJumping = false
       }
-      const direction = jumpFrame === totalFrames ? 'bottom' : 'top'
 
-      this.notifyMovement({ direction: 'top', endMovement: jumpFrame === totalFrames })
+      this.notifyMovement({ direction: 'top', endMovement: true })
       updateScreen()
     }, 10)
   }
 
-  canMove(direction: DirectionType) {
-    const collidedObject = this.collisions[ direction ].find(c => c.collisionType === Collisions.CONTACT || c.collisionType === Collisions.IMPACT)
-    const isMovableObject = collidedObject?.target.type === 'movable-object'
-    return !collidedObject || isMovableObject
+  override mayFall(): boolean {
+    return this.usesGravity && !this.isJumping;
   }
 
 }

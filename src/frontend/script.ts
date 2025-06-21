@@ -1,4 +1,5 @@
 import { ScreenSize } from "../core/constants/ScreenSize.js"
+import { MovableEntity } from "../core/entities/MovableEntity.js"
 import { MovableObject } from "../core/entities/MovableObject.js"
 import { Platform } from "../core/entities/Platform.js"
 import { Player } from "../core/entities/Player.js"
@@ -37,7 +38,7 @@ const platform1 = new Platform(
 const platform2 = new Platform(
   genericBody,
   { x: GetSize(40) },
-  { x: GetSize(30), y: 110 },
+  { x: GetSize(30), y: 160 },
   '#00ffa0'
 )
 const platform3 = new Platform(
@@ -58,6 +59,22 @@ const block = new MovableObject(
   { x: 40, y: 100 },
   { x: 6, y: 6 }
 )
+const block1 = new MovableObject(
+  genericBody,
+  { x: 100, y: 100 },
+  { x: 6, y: 7 }
+)
+const block2 = new MovableObject(
+  genericBody,
+  { x: 120, y: 90 },
+  { x: 6, y: 14 }
+)
+
+const block3 = new MovableObject(
+  genericBody,
+  { x: 140, y: 80 },
+  { x: 6, y: 21 }
+)
 
 
 const game = new Game(
@@ -67,10 +84,12 @@ const game = new Game(
 )
 
 game.addEntity(block)
+game.addEntity(block1)
+game.addEntity(block2)
+game.addEntity(block3)
 game.addEntity(platform1)
 game.addEntity(platform2)
 game.addEntity(platform3)
-
 
 const collider = new Collider(game)
 const gravity = new Gravity(game, collider)
@@ -79,7 +98,7 @@ const gravity = new Gravity(game, collider)
 control.subscribe((keyPress: string) => game.onKeyPress(keyPress))
 
 game.entities.forEach(entity => {
-  if(entity.type === 'platform') return
+  if(!(entity instanceof MovableEntity)) return
   
   
   entity.movementSubscribe((data) => {
