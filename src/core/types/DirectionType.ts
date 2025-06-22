@@ -1,1 +1,1 @@
-export type DirectionType = 'top' | 'left' | 'bottom' | 'right'
+export type DirectionType = 'top' | 'left' | 'bottom' | 'right' | 'hit'

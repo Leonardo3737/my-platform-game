@@ -2,8 +2,8 @@ import { Enemy } from "./entities/Enemy.js"
 import { Entity } from "./entities/Entity.js"
 import { MovableEntity } from "./entities/MovableEntity.js"
 import { MovableObject } from "./entities/MovableObject.js"
-import { Platform } from "./entities/Platform.js"
 import { Player } from "./entities/Player.js"
+import { Tree } from './entities/Tree.js'
 import { Collisions } from "./enum/Collisions.js"
 import { CollisionsType } from "./types/CollisionsType.js"
 import { DirectionType } from "./types/DirectionType.js"
@@ -30,7 +30,30 @@ export class Game {
   }
 
   startGame() {
-    setInterval(() => this.updateScreen(), 10)
+    setInterval(() => {
+      let collidedTree = false
+      for (let direction in this.player.collisions) {
+
+        this.player.collisions[ direction as DirectionType ].forEach(collision => {
+          const collidedObject = collision.target
+          if (collidedObject instanceof Tree) {
+            collidedTree = true
+          }
+        })
+        if (collidedTree) continue
+      }
+
+      const auxMessage = document.getElementById("aux-message")
+      if (auxMessage) {
+        if (collidedTree) {
+          auxMessage.innerText = 'pressione F para cortar a árvore'
+        } else if (auxMessage.innerText) {
+          auxMessage.innerText = ''
+        }
+      }
+
+      this.updateScreen()
+    }, 10)
   }
 
   updateLifebar() {
@@ -65,33 +88,43 @@ export class Game {
       S: 'bottom',
       D: 'right',
     }
-    const direction = keyMap[key]
+    const direction = keyMap[ key ]
 
     if (direction && !this.player.isTakingDamage) {
-      this.moveEntity({
-        entity: this.player,
-        direction
-      })
+      const action = this.player.actions[ direction ]
+      if (action?.type === 'movement') {
+        this.moveEntity({
+          entity: this.player,
+          direction
+        })
+      } else {
+        action?.run()
+      }
     }
   }
 
   moveEntity(data: MoveEntityData) {
     const { entity, direction, endMovement, isGravity } = data
 
-    const movement = entity.movements[direction]
+    const action = entity.actions[ direction ]
+
+    if (!action) return
 
     entity.lastPosition = { ...entity.position }
 
     if (isGravity) {
-      movement()
+      action.run()
       //this.updateScreen()
       return
     }
 
     let mayMove = true
 
-    entity.collisions[direction].forEach(collision => {
+    entity.collisions[ direction ].forEach(collision => {
       const collidedObject = collision.target
+      if (collidedObject.canCross) {
+        return
+      }
 
       if (!(collidedObject instanceof MovableEntity)) {
         mayMove = false
@@ -107,15 +140,16 @@ export class Game {
     })
 
     if (!mayMove) return
-    movement()
+    action.run()
   }
 
   notifyCollision(collider: Entity, direction: DirectionType, collisions: CollisionsType) {
 
-    const collision = collisions[direction]
+    const collision = collisions[ direction ]
     if (collision instanceof Array && collision.length) {
       collision.map(c => {
 
+        // MOVER ENTIDADES MovableObject
         if (c.target instanceof MovableObject && c.collisionType !== Collisions.CONTACT) {
           this.moveEntity({
             entity: c.target,
@@ -124,27 +158,29 @@ export class Game {
           })
         }
 
+        // DANO ENTIDADES Enemy
         if (direction === 'bottom' && c.target instanceof Enemy && collider instanceof Player && c.collisionType === Collisions.CONTACT) {
           console.log(direction);
 
-          if (this.cooldownDamage[c.target.id]) return
-          this.cooldownDamage[c.target.id] = true
+          if (this.cooldownDamage[ c.target.id ]) return
+          this.cooldownDamage[ c.target.id ] = true
           setTimeout(() => this.moveEntity({
             entity: collider,
             direction: 'top',
             endMovement: true,
           }), 10)
           setTimeout(() => {
-            this.cooldownDamage[c.target.id] = false
+            this.cooldownDamage[ c.target.id ] = false
           }, 100)
 
           c.target.sufferDamage()
           if (!c.target.life) {
             const index = this.entities.findIndex(e => e.id === c.target.id)
-            delete this.entities[index]
+            delete this.entities[ index ]
           }
         }
 
+        // DANO ENTIDADES Player
         if ((direction === 'left' || direction === 'right') && c.target instanceof Player && collider instanceof Enemy) {
           this.playerTakingDamage(c.target, collider.damage, direction)
         }
@@ -158,10 +194,10 @@ export class Game {
   }
 
   playerTakingDamage(player: Player, damage: number, direction: DirectionType) {
-    if (this.cooldownDamage[player.id]) return
-    this.cooldownDamage[player.id] = true
+    if (this.cooldownDamage[ player.id ]) return
+    this.cooldownDamage[ player.id ] = true
     setTimeout(() => {
-      this.cooldownDamage[player.id] = false
+      this.cooldownDamage[ player.id ] = false
     }, 100)
     player.life = player.life - damage
 

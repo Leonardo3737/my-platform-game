@@ -1,7 +1,6 @@
-import { Collisions } from "../enum/Collisions.js"
+import { ActionType } from '../types/ActionType.js'
 import { DirectionType } from "../types/DirectionType.js"
 import { MeassureType } from "../types/MeassureType.js"
-import { Entity } from "./Entity.js"
 import { MovableEntity } from "./MovableEntity.js"
 
 export class Player extends MovableEntity {
@@ -11,11 +10,23 @@ export class Player extends MovableEntity {
   isJumping = false
   isTakingDamage = false
 
-  movements = {
-    top: () => this.jump(),
-    left: () => this.walk('left'),
-    bottom: () => { },
-    right: () => this.walk('right'),
+  actions: Partial<Record<DirectionType, { type: ActionType, run: () => void }>> = {
+    top: {
+      type: 'movement',
+      run: () => this.jump(),
+    },
+    left: {
+      type: 'movement',
+      run: () => this.walk('left'),
+    },
+    right: {
+      type: 'movement',
+      run: () => this.walk('right'),
+    },
+    hit: {
+      type: 'movement',
+      run: () => this.hit(),
+    }
   }
 
   movementPositions = {
@@ -46,7 +57,7 @@ export class Player extends MovableEntity {
       bottom: { ...this.position, y: this.position.y + this.velocity },
       right: { ...this.position, x: this.position.x + this.velocity },
     }
-    const movement = movements[direction]
+    const movement = movements[ direction ]
     this.hide()
     this.position = movement
     this.notifyMovement({ direction, endMovement: true })
@@ -75,6 +86,10 @@ export class Player extends MovableEntity {
       this.notifyMovement({ direction: 'top', endMovement: true })
       this.render()
     }, 10)
+  }
+
+  hit() {
+
   }
 
   override mayFall(): boolean {

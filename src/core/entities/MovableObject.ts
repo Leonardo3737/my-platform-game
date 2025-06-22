@@ -1,17 +1,20 @@
-import { Collisions } from "../enum/Collisions.js"
+import { ActionType } from '../types/ActionType.js'
 import { DirectionType } from "../types/DirectionType.js"
 import { MeassureType } from "../types/MeassureType.js"
-import { Entity } from "./Entity.js"
 import { MovableEntity } from "./MovableEntity.js"
 
 export class MovableObject extends MovableEntity {
   //velocity = 10
 
-  movements = {
-    left: () => this.walk('left'),
-    right: () => this.walk('right'),
-    top: () => { },
-    bottom: () => { },
+  actions: Partial<Record<DirectionType, { type: ActionType, run: () => void }>> = {
+    left: {
+      type: 'movement',
+      run: () => this.walk('left'),
+    },
+    right: {
+      type: 'movement',
+      run: () => this.walk('right'),
+    }
   }
 
   constructor(
@@ -36,7 +39,7 @@ export class MovableObject extends MovableEntity {
       bottom: { ...this.position },
       top: { ...this.position },
     }
-    const movement = movements[direction]
+    const movement = movements[ direction ]
     this.hide()
     this.position = movement || this.position
     this.notifyMovement({ direction, endMovement: true })
@@ -44,7 +47,7 @@ export class MovableObject extends MovableEntity {
   }
 
   canMove(direction: DirectionType) {
-    if(direction === 'top') return false
+    if (direction === 'top') return false
     const superCanMove = super.canMove(direction)
     return superCanMove
   }

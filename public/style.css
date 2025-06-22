@@ -8,6 +8,7 @@ body {
   width: 100dvw;
   height: 100dvh;
   display: flex;
+  font-family: sans-serif;
 }
 
 #screen-game {
@@ -20,4 +21,11 @@ body {
   position: absolute;
   top: 120px;
   left: 120px;
+}
+
+#aux-message {
+  display: flex;
+  position: absolute;
+  bottom: 70px;
+  left: calc(50% - 40px);
 }

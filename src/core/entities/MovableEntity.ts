@@ -1,4 +1,4 @@
-import { Collisions } from "../enum/Collisions.js";
+import { ActionType } from '../types/ActionType.js';
 import { DirectionType } from "../types/DirectionType.js";
 import { EntityType } from "../types/EntityType.js";
 import { MeassureType } from "../types/MeassureType.js";
@@ -10,7 +10,7 @@ export abstract class MovableEntity extends Entity {
   velocity = 1 // 10
   lastPosition: MeassureType
 
-  abstract movements: Record<DirectionType, ()=>void>
+  abstract actions: Partial<Record<DirectionType, { type: ActionType, run: () => void }>>
 
   constructor(
     body: CanvasRenderingContext2D,
@@ -32,22 +32,26 @@ export abstract class MovableEntity extends Entity {
   }
 
   canMove(direction: DirectionType) {
-    
+
     let mayMove = true
 
-    this.collisions[direction].forEach(collision => {
+    this.collisions[ direction ].forEach(collision => {
       const collidedObject = collision.target
+
+      if (collidedObject.canCross) {
+        return
+      }
 
       if (!(collidedObject instanceof MovableEntity)) {
         mayMove = false
         return
       }
-      
+
       collidedObject.notifyMovement({
         direction,
         endMovement: true
       })
-      
+
       if (!collidedObject.canMove(direction)) {
         mayMove = false
       }
@@ -55,14 +59,14 @@ export abstract class MovableEntity extends Entity {
     return mayMove
   }
 
- /*  hide() {
-    this.body.clearRect(
-      this.lastPosition.x,
-      this.lastPosition.y,
-      this.size.x,
-      this.size.y
-    )
-  } */
+  /*  hide() {
+     this.body.clearRect(
+       this.lastPosition.x,
+       this.lastPosition.y,
+       this.size.x,
+       this.size.y
+     )
+   } */
 
   movementSubscribe(event: (data: MoveEntityData) => void) {
     this.movementObserves.push(event)

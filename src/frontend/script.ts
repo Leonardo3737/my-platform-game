@@ -1,9 +1,9 @@
 import { ScreenSize } from "../core/constants/ScreenSize.js"
-import { Enemy } from "../core/entities/Enemy.js"
 import { MovableEntity } from "../core/entities/MovableEntity.js"
 import { MovableObject } from "../core/entities/MovableObject.js"
 import { Platform } from "../core/entities/Platform.js"
 import { Player } from "../core/entities/Player.js"
+import { Tree } from '../core/entities/Tree.js'
 import { Game } from "../core/Game.js"
 import { Collider } from "../core/physics/Collider.js"
 import { Gravity } from "../core/physics/Gravity.js"
@@ -12,7 +12,7 @@ import { Control } from "./control.js"
 const screenGame: HTMLCanvasElement = document.getElementById('screen-game') as HTMLCanvasElement
 const genericBody = screenGame.getContext('2d')
 
-if(!genericBody) {
+if (!genericBody) {
   throw new Error("cannot get genericBody")
 }
 
@@ -24,8 +24,8 @@ const screenPosition = {
 screenGame.width = ScreenSize.x
 screenGame.height = ScreenSize.y
 
-function GetSize(percentage = 100) {  
-  return (screenGame.width/5) * (percentage / 100)
+function GetSize(percentage = 100) {
+  return (screenGame.width / 5) * (percentage / 100)
 }
 
 const control = new Control()
@@ -49,17 +49,22 @@ const platform3 = new Platform(
   '#00ffa0'
 )
 
+const tree = new Tree(
+  genericBody,
+  { x: 50, y: 106 },
+)
+
 const player = new Player(
   genericBody,
   { x: 10, y: 100 },
   { x: 6, y: 10 }
 )
 
-const enemy = new Enemy(
+/* const enemy = new Enemy(
   genericBody,
   { x: 40, y: 100 },
   { x: 6, y: 6 }
-)
+) */
 
 const block = new MovableObject(
   genericBody,
@@ -90,7 +95,8 @@ const game = new Game(
   player,
 )
 
-game.addEntity(enemy)
+//game.addEntity(enemy)
+game.addEntity(tree)
 game.addEntity(block)
 game.addEntity(block1)
 game.addEntity(block2)
@@ -106,18 +112,18 @@ const gravity = new Gravity(game, collider)
 control.subscribe((keyPress: string) => game.onKeyPress(keyPress))
 
 game.entities.forEach(entity => {
-  if(!(entity instanceof MovableEntity)) return
-  
-  
+  if (!(entity instanceof MovableEntity)) return
+
+
   entity.movementSubscribe((data) => {
     if (!data.endMovement) return
-    
+
     collider.checkCollision(data)
   })
-  
+
   entity.movementSubscribe((data) => {
     if (!data.endMovement || data.isGravity) return
-    
+
     gravity.checkSpecificFallCondition(data.entity)
   })
 

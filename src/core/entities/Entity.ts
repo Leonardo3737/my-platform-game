@@ -2,7 +2,6 @@ import { CollisionsType } from "../types/CollisionsType.js";
 import { DirectionType } from "../types/DirectionType.js";
 import { EntityType } from "../types/EntityType.js";
 import { MeassureType } from "../types/MeassureType.js";
-import { MoveEntityData } from "../types/MoveEntityData.js";
 
 let entityIdCounter = 1;
 
@@ -13,17 +12,15 @@ export abstract class Entity {
   size: MeassureType
   color: string
   type: EntityType
-  // movementObserves: ((data: MoveEntityData) => void)[] = [] // REMOVER
   collisions: CollisionsType = { top: [], right: [], bottom: [], left: [] };
   usesGravity: boolean
   isSuspended: boolean = false // remover depois
-
-  // movements: Record<DirectionType, Function> = {} as Record<DirectionType, Function> /// REMOVER
+  canCross: boolean
 
   get area() {
     return {
-      x: [this.position.x, this.position.x + this.size.x],
-      y: [this.position.y, this.position.y + this.size.y]
+      x: [ this.position.x, this.position.x + this.size.x ],
+      y: [ this.position.y, this.position.y + this.size.y ]
     }
   }
 
@@ -33,14 +30,16 @@ export abstract class Entity {
     size: MeassureType,
     color: string,
     type: EntityType,
-    usesGravity: boolean
+    usesGravity: boolean,
+    canCross: boolean = false
   ) {
     this.position = { x: position.x * 5, y: position.y * 5 }
-    
+
     this.size = { x: size.x * 5, y: size.y * 5 }
     this.body = body
     this.color = color
     this.type = type
+    this.canCross = canCross
     this.usesGravity = usesGravity
     this.id = entityIdCounter++
   }
