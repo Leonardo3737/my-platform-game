@@ -1,6 +1,5 @@
 import { Entity } from "../entities/Entity.js"
 import { MovableEntity } from "../entities/MovableEntity.js"
-import { Player } from "../entities/Player.js"
 import { Collisions } from "../enum/Collisions.js"
 import { Game } from "../Game.js"
 import { CollisionsType } from "../types/CollisionsType.js"
@@ -22,17 +21,7 @@ export class Gravity {
   }
 
   isToFall = (collisionType: CollisionsType) => !collisionType.bottom.length || !collisionType.bottom.find(c => c.collisionType === Collisions.CONTACT)
-  /* entityMayFall = (entity: Entity) =>
-    entity.usesGravity &&
-    (
-      (
-        !(entity instanceof Player) &&
-        entity instanceof MovableEntity) ||
-      (
-        entity instanceof Player &&
-        !entity.isJumping
-      )
-    ) */
+
 
   checkFallCondition() {
     this.game.entities.forEach(entity => {
@@ -63,9 +52,9 @@ export class Gravity {
 
   pushDown(entity: MovableEntity) {
 
-    if (this.fallingEntities[entity.id]) return
+    if (this.fallingEntities[ entity.id ]) return
     entity.isSuspended = true
-    this.fallingEntities[entity.id] = true
+    this.fallingEntities[ entity.id ] = true
 
     let auxVelocity = 10;
 
@@ -74,9 +63,9 @@ export class Gravity {
         auxVelocity--;
       }
 
-      if (this.fallingEntities[entity.id]) {
+      if (this.fallingEntities[ entity.id ]) {
         const collisionType = this.collider.getEntityState(entity.id);
-        this.fallingEntities[entity.id] = this.isToFall(collisionType);
+        this.fallingEntities[ entity.id ] = this.isToFall(collisionType);
 
         if (!this.isToFall(collisionType)) {
           entity.isSuspended = false;
@@ -84,10 +73,9 @@ export class Gravity {
         }
 
         entity.hide();
-        entity.lastPosition = {...entity.position}
         entity.position = { ...entity.position, y: entity.position.y + this.velocity };
         entity.notifyMovement({
-          direction: 'bottom',
+          actionType: 'bottom',
           endMovement: true,
           isGravity: true
         });

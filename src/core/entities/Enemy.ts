@@ -1,4 +1,5 @@
-import { DirectionType } from "../types/DirectionType.js";
+import { Action } from "../types/Action.js";
+import { ActionType } from '../types/ActionType.js';
 import { MeassureType } from "../types/MeassureType.js";
 import { MovableEntity } from "./MovableEntity.js";
 
@@ -6,11 +7,20 @@ export class Enemy extends MovableEntity {
   life = 2
   damage = 1
 
+  actions: Partial<Record<Action, { type: ActionType, run: () => void }>> = {
+    left: {
+      type: 'movement',
+      run: () => this.walk('left'),
+    },
+    right: {
+      type: 'movement',
+      run: () => this.walk('right'),
+    }
+  }
+
   movements = {
-    top: () => { },
-    left: () => this.walk('left'),
-    bottom: () => { },
-    right: () => this.walk('right'),
+    left: () => ({ ...this.position, x: this.position.x - this.velocity }),
+    right: () => ({ ...this.position, x: this.position.x + this.velocity }),
   }
 
   constructor(
@@ -29,7 +39,7 @@ export class Enemy extends MovableEntity {
   }
 
   patrol() {
-    const walkToDirection = (direction: DirectionType) => new Promise<void>(resolve => {
+    const walkToDirection = (direction: Action) => new Promise<void>(resolve => {
       let frame = 0
       let totalFrame = 70
       const idInterval = setInterval(() => {
@@ -60,20 +70,6 @@ export class Enemy extends MovableEntity {
     };
 
     patrolLoop();
-  }
-
-  walk(direction: DirectionType) {
-    const movements = {
-      top: { ...this.position, y: this.position.y - this.velocity },
-      left: { ...this.position, x: this.position.x - this.velocity },
-      bottom: { ...this.position, y: this.position.y + this.velocity },
-      right: { ...this.position, x: this.position.x + this.velocity },
-    }
-    const movement = movements[direction]
-    this.hide()
-    this.position = movement
-    this.notifyMovement({ direction, endMovement: true })
-    this.render()
   }
 
   sufferDamage() {

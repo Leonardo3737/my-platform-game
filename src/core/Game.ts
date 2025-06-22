@@ -1,13 +1,13 @@
 import { Enemy } from "./entities/Enemy.js"
 import { Entity } from "./entities/Entity.js"
-import { MovableEntity } from "./entities/MovableEntity.js"
+import { Item } from './entities/Item.js'
 import { MovableObject } from "./entities/MovableObject.js"
 import { Player } from "./entities/Player.js"
 import { Tree } from './entities/Tree.js'
 import { Collisions } from "./enum/Collisions.js"
+import { Action } from "./types/Action.js"
 import { CollisionsType } from "./types/CollisionsType.js"
-import { DirectionType } from "./types/DirectionType.js"
-import { MoveEntityData } from "./types/MoveEntityData.js"
+import { DirectionType } from './types/DirectionType.js'
 
 export class Game {
   body: CanvasRenderingContext2D
@@ -15,12 +15,14 @@ export class Game {
   player: Player
   entities: Entity[] = []
   cooldownDamage: Record<number, boolean> = {}
+  firstRender: boolean
 
   constructor(
     body: CanvasRenderingContext2D,
     screenGame: HTMLCanvasElement,
     player: Player,
   ) {
+    this.firstRender = true
     this.body = body
     this.screenGame = screenGame
     this.player = player
@@ -34,7 +36,7 @@ export class Game {
       let collidedTree = false
       for (let direction in this.player.collisions) {
 
-        this.player.collisions[ direction as DirectionType ].forEach(collision => {
+        this.player.collisions[ direction as keyof typeof this.player.collisions ].forEach(collision => {
           const collidedObject = collision.target
           if (collidedObject instanceof Tree) {
             collidedTree = true
@@ -69,11 +71,34 @@ export class Game {
 
   updateScreen() {
     this.entities.forEach(entity => {
+      if (this.firstRender) {
+        this.onFirstRender(entity)
+      }
       entity.hide()
       entity.render()
     })
     this.player.hide()
     this.player.render()
+    if (this.firstRender) {
+      this.firstRender = false
+    }
+  }
+
+  onFirstRender(entity: Entity) {
+    if (entity instanceof Tree) {
+      entity.subscribeDie(() => {
+        const index = this.entities.findIndex(e => e.id === entity.id)
+        if (index !== -1) {
+          this.entities.splice(index, 1)
+          const stick = new Item(
+            this.body,
+            { x: entity.position.x / 5, y: entity.position.y / 5 + entity.size.y / 5 - 8 }
+          )
+          this.addEntity(stick)
+          //this.updateScreen()
+        }
+      })
+    }
   }
 
   addEntity(entity: Entity) {
@@ -81,66 +106,29 @@ export class Game {
     this.updateScreen()
   }
 
-  onKeyPress(key: string) {
-    const keyMap: Record<string, DirectionType> = {
+  onKeyDown(key: string) {
+    const keyMap: Record<string, Action> = {
       W: 'top',
       A: 'left',
       S: 'bottom',
       D: 'right',
     }
-    const direction = keyMap[ key ]
+    const actionType = keyMap[ key ]
 
-    if (direction && !this.player.isTakingDamage) {
-      const action = this.player.actions[ direction ]
-      if (action?.type === 'movement') {
-        this.moveEntity({
-          entity: this.player,
-          direction
-        })
-      } else {
-        action?.run()
-      }
+    if (actionType && !this.player.isTakingDamage) {
+      this.player.runAction(actionType)
     }
   }
 
-  moveEntity(data: MoveEntityData) {
-    const { entity, direction, endMovement, isGravity } = data
-
-    const action = entity.actions[ direction ]
-
-    if (!action) return
-
-    entity.lastPosition = { ...entity.position }
-
-    if (isGravity) {
-      action.run()
-      //this.updateScreen()
-      return
+  onKeyPress(key: string) {
+    const keyMap: Record<string, Action> = {
+      F: 'hit',
     }
+    const actionType = keyMap[ key ]
 
-    let mayMove = true
-
-    entity.collisions[ direction ].forEach(collision => {
-      const collidedObject = collision.target
-      if (collidedObject.canCross) {
-        return
-      }
-
-      if (!(collidedObject instanceof MovableEntity)) {
-        mayMove = false
-        return
-      }
-      collidedObject.notifyMovement({
-        direction,
-        endMovement: true
-      })
-      if (!collidedObject.canMove(direction)) {
-        mayMove = false
-      }
-    })
-
-    if (!mayMove) return
-    action.run()
+    if (actionType && !this.player.isTakingDamage) {
+      this.player.runAction(actionType)
+    }
   }
 
   notifyCollision(collider: Entity, direction: DirectionType, collisions: CollisionsType) {
@@ -151,11 +139,7 @@ export class Game {
 
         // MOVER ENTIDADES MovableObject
         if (c.target instanceof MovableObject && c.collisionType !== Collisions.CONTACT) {
-          this.moveEntity({
-            entity: c.target,
-            direction,
-            endMovement: true,
-          })
+          c.target.runAction(direction)
         }
 
         // DANO ENTIDADES Enemy
@@ -164,11 +148,7 @@ export class Game {
 
           if (this.cooldownDamage[ c.target.id ]) return
           this.cooldownDamage[ c.target.id ] = true
-          setTimeout(() => this.moveEntity({
-            entity: collider,
-            direction: 'top',
-            endMovement: true,
-          }), 10)
+          setTimeout(() => collider.runAction('top'), 10)
           setTimeout(() => {
             this.cooldownDamage[ c.target.id ] = false
           }, 100)
@@ -176,7 +156,7 @@ export class Game {
           c.target.sufferDamage()
           if (!c.target.life) {
             const index = this.entities.findIndex(e => e.id === c.target.id)
-            delete this.entities[ index ]
+            this.entities.splice(index, 1)
           }
         }
 
@@ -193,7 +173,7 @@ export class Game {
     }
   }
 
-  playerTakingDamage(player: Player, damage: number, direction: DirectionType) {
+  playerTakingDamage(player: Player, damage: number, direction: Action) {
     if (this.cooldownDamage[ player.id ]) return
     this.cooldownDamage[ player.id ] = true
     setTimeout(() => {
@@ -210,11 +190,7 @@ export class Game {
 
     const intervalId = setInterval(() => {
       if (frame < totalFrame) {
-        this.moveEntity({
-          entity: player,
-          direction,
-          endMovement: true,
-        })
+        this.player.runAction(direction)
         frame++
       } else {
         player.isTakingDamage = false

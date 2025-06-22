@@ -1,5 +1,6 @@
+import { Action } from "../types/Action.js";
 import { ActionType } from '../types/ActionType.js';
-import { DirectionType } from "../types/DirectionType.js";
+import { DirectionType } from '../types/DirectionType.js';
 import { EntityType } from "../types/EntityType.js";
 import { MeassureType } from "../types/MeassureType.js";
 import { MoveEntityData } from "../types/MoveEntityData.js";
@@ -8,9 +9,9 @@ import { Entity } from "./Entity.js";
 export abstract class MovableEntity extends Entity {
   movementObserves: ((data: MoveEntityData) => void)[] = []
   velocity = 1 // 10
-  lastPosition: MeassureType
 
-  abstract actions: Partial<Record<DirectionType, { type: ActionType, run: () => void }>>
+  abstract actions: Partial<Record<Action, { type: ActionType, run: () => void }>>
+  abstract movements: Partial<Record<Action, () => MeassureType>>
 
   constructor(
     body: CanvasRenderingContext2D,
@@ -28,7 +29,23 @@ export abstract class MovableEntity extends Entity {
       type,
       usesGravity
     )
-    this.lastPosition = { ...position }
+  }
+
+  runAction(actionType: Action) {
+
+    const action = this.actions[ actionType ]
+
+    if (!action) return
+
+    if (action.type !== 'movement') {
+      action.run()
+      return
+    }
+
+    if (this.canMove(actionType as DirectionType)) {
+      action.run()
+      return
+    }
   }
 
   canMove(direction: DirectionType) {
@@ -48,7 +65,7 @@ export abstract class MovableEntity extends Entity {
       }
 
       collidedObject.notifyMovement({
-        direction,
+        actionType: direction,
         endMovement: true
       })
 
@@ -59,20 +76,21 @@ export abstract class MovableEntity extends Entity {
     return mayMove
   }
 
-  /*  hide() {
-     this.body.clearRect(
-       this.lastPosition.x,
-       this.lastPosition.y,
-       this.size.x,
-       this.size.y
-     )
-   } */
-
   movementSubscribe(event: (data: MoveEntityData) => void) {
     this.movementObserves.push(event)
   }
 
   notifyMovement(data: Omit<MoveEntityData, 'entity'>) {
     this.movementObserves.forEach(callback => callback({ ...data, entity: this }))
+  }
+
+  walk(direction: Action) {
+    const movement = this.movements[ direction ]
+    if (!movement) return
+
+    this.hide()
+    this.position = movement()
+    this.notifyMovement({ actionType: direction, endMovement: true })
+    this.render()
   }
 }

@@ -1,7 +1,9 @@
-import { ActionType } from '../types/ActionType.js'
-import { DirectionType } from "../types/DirectionType.js"
-import { MeassureType } from "../types/MeassureType.js"
-import { MovableEntity } from "./MovableEntity.js"
+import { Action } from "../types/Action.js";
+import { ActionType } from '../types/ActionType.js';
+import { DirectionType } from '../types/DirectionType.js';
+import { MeassureType } from "../types/MeassureType.js";
+import { MovableEntity } from "./MovableEntity.js";
+import { Tree } from './Tree.js';
 
 export class Player extends MovableEntity {
   life = 5
@@ -10,7 +12,7 @@ export class Player extends MovableEntity {
   isJumping = false
   isTakingDamage = false
 
-  actions: Partial<Record<DirectionType, { type: ActionType, run: () => void }>> = {
+  actions: Partial<Record<Action, { type: ActionType, run: () => void }>> = {
     top: {
       type: 'movement',
       run: () => this.jump(),
@@ -24,16 +26,16 @@ export class Player extends MovableEntity {
       run: () => this.walk('right'),
     },
     hit: {
-      type: 'movement',
+      type: 'hit',
       run: () => this.hit(),
     }
   }
 
-  movementPositions = {
-    top: (aggregator: number) => ({ ...this.position, y: this.position.y - aggregator }),
-    left: (aggregator: number) => ({ ...this.position, x: this.position.x - aggregator }),
-    bottom: (aggregator: number) => ({ ...this.position, y: this.position.y + aggregator }),
-    right: (aggregator: number) => ({ ...this.position, x: this.position.x + aggregator }),
+  movements = {
+    top: () => ({ ...this.position, y: this.position.y - this.velocity }),
+    left: () => ({ ...this.position, x: this.position.x - this.velocity }),
+    bottom: () => ({ ...this.position, y: this.position.y + this.velocity }),
+    right: () => ({ ...this.position, x: this.position.x + this.velocity }),
   }
 
   constructor(
@@ -48,20 +50,6 @@ export class Player extends MovableEntity {
       '#00B7EB',
       'player',
     )
-  }
-
-  walk(direction: DirectionType) {
-    const movements = {
-      top: { ...this.position, y: this.position.y - this.velocity },
-      left: { ...this.position, x: this.position.x - this.velocity },
-      bottom: { ...this.position, y: this.position.y + this.velocity },
-      right: { ...this.position, x: this.position.x + this.velocity },
-    }
-    const movement = movements[ direction ]
-    this.hide()
-    this.position = movement
-    this.notifyMovement({ direction, endMovement: true })
-    this.render()
   }
 
   jump() {
@@ -83,13 +71,29 @@ export class Player extends MovableEntity {
         this.isJumping = false
       }
 
-      this.notifyMovement({ direction: 'top', endMovement: true })
+      this.notifyMovement({ actionType: 'top', endMovement: true })
       this.render()
     }, 10)
   }
 
   hit() {
+    let tree: unknown = undefined
 
+    for (let direction in this.collisions) {
+      this.collisions[ direction as DirectionType ].forEach(collision => {
+        const collidedObject = collision.target
+
+        if (collidedObject instanceof Tree) {
+          tree = collidedObject
+          return
+        }
+      })
+    }
+
+    if (!(tree instanceof Tree)) {
+      return
+    }
+    tree.takeDamage()
   }
 
   override mayFall(): boolean {

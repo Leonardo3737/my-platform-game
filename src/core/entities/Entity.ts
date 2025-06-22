@@ -1,5 +1,5 @@
 import { CollisionsType } from "../types/CollisionsType.js";
-import { DirectionType } from "../types/DirectionType.js";
+import { DirectionType } from '../types/DirectionType.js';
 import { EntityType } from "../types/EntityType.js";
 import { MeassureType } from "../types/MeassureType.js";
 

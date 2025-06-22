@@ -1,10 +1,9 @@
-import { Entity } from "../entities/Entity.js"
 import { MovableEntity } from "../entities/MovableEntity.js"
-import { DirectionType } from "./DirectionType.js"
+import { Action } from './Action.js'
 
 export type MoveEntityData = {
   entity: MovableEntity,
-  direction: DirectionType,
+  actionType: Action,
   endMovement?: boolean,
   isGravity?: boolean
 }

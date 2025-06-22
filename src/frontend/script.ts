@@ -109,7 +109,8 @@ const collider = new Collider(game)
 const gravity = new Gravity(game, collider)
 
 
-control.subscribe((keyPress: string) => game.onKeyPress(keyPress))
+control.subscribe('keydown', (keydown: string) => game.onKeyDown(keydown))
+control.subscribe('keypress', (keypress: string) => game.onKeyPress(keypress))
 
 game.entities.forEach(entity => {
   if (!(entity instanceof MovableEntity)) return

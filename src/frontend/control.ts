@@ -1,39 +1,52 @@
 export class Control {
-  observes: ((key: string) => void)[] = []
+  observesKeyDown: ((key: string) => void)[] = []
+  observesKeyPress: ((key: string) => void)[] = []
   intervalIds: Record<string, NodeJS.Timeout> = {}
 
   constructor() {
     document.addEventListener('keydown', (event) => this.onKeyDown(event))
     document.addEventListener('keyup', (event) => this.onKeyUp(event))
+    document.addEventListener('keypress', (event) => this.onKeyPress(event))
   }
 
   getFormattedKey = (event: KeyboardEvent) => event.key.toUpperCase()
 
   onKeyDown(event: KeyboardEvent) {
-    
-    const key = this.getFormattedKey(event)
-    if(this.intervalIds[key]) return    
 
-    this.intervalIds[key] = setInterval(() => {
-      this.notifyAll(key)
+    const key = this.getFormattedKey(event)
+    if (this.intervalIds[ key ]) return
+
+    this.intervalIds[ key ] = setInterval(() => {
+      this.notifyAllKeyDown(key)
     }, 10)
   }
-  
+
   onKeyUp(event: KeyboardEvent) {
     const key = this.getFormattedKey(event)
-    if(this.intervalIds[key]) {
-      clearInterval(this.intervalIds[key])
-      delete this.intervalIds[key]
+    if (this.intervalIds[ key ]) {
+      clearInterval(this.intervalIds[ key ])
+      delete this.intervalIds[ key ]
     }
   }
 
-
-  subscribe(callback: (key: string) => void) {
-    this.observes.push(callback)
+  onKeyPress(event: KeyboardEvent) {
+    const key = this.getFormattedKey(event)
+    this.notifyAllKeyPress(key)
   }
 
-  notifyAll(key: string) {
+  subscribe(type: 'keydown' | 'keypress', callback: (key: string) => void) {
+    if (type === 'keypress') {
+      this.observesKeyPress.push(callback)
+    } else if (type === 'keydown') {
+      this.observesKeyDown.push(callback)
+    }
+  }
 
-    this.observes.forEach(observe => observe(key))
+  notifyAllKeyDown(key: string) {
+    this.observesKeyDown.forEach(observe => observe(key))
+  }
+
+  notifyAllKeyPress(key: string) {
+    this.observesKeyPress.forEach(observe => observe(key))
   }
 }
