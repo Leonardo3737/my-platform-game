@@ -1,1 +1,1 @@
-export type ActionType = 'movement' | 'hit'
+export type ActionType = 'movement' | 'action'

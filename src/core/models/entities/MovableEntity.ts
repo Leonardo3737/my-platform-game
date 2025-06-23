@@ -1,10 +1,10 @@
-import { Action } from "../types/Action.js";
-import { ActionType } from '../types/ActionType.js';
-import { DirectionType } from '../types/DirectionType.js';
-import { EntityType } from "../types/EntityType.js";
-import { MeassureType } from "../types/MeassureType.js";
-import { MoveEntityData } from "../types/MoveEntityData.js";
-import { Entity } from "./Entity.js";
+import { Action } from "../../types/Action.js";
+import { ActionType } from '../../types/ActionType.js';
+import { DirectionType } from '../../types/DirectionType.js';
+import { EntityType } from "../../types/EntityType.js";
+import { MeassureType } from "../../types/MeassureType.js";
+import { MoveEntityData } from "../../types/MoveEntityData.js";
+import { Entity } from "./../Entity.js";
 
 export abstract class MovableEntity extends Entity {
   movementObserves: ((data: MoveEntityData) => void)[] = []

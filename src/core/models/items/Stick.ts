@@ -1,8 +1,7 @@
-import { DirectionType } from '../types/DirectionType.js';
-import { MeassureType } from '../types/MeassureType.js';
-import { Entity } from './Entity.js';
+import { MeassureType } from '../../types/MeassureType.js';
+import { Item } from './Item.js';
 
-export class Item extends Entity {
+export class Stick extends Item {
   constructor(
     body: CanvasRenderingContext2D,
     position: MeassureType,
@@ -13,13 +12,7 @@ export class Item extends Entity {
       { x: 8, y: 8 },
       '#8B4513',
       'stick',
-      false,
-      true
     )
-  }
-
-  canMove(direction: DirectionType) {
-    return false;
   }
 
   override render() {

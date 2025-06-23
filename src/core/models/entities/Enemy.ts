@@ -1,6 +1,6 @@
-import { Action } from "../types/Action.js";
-import { ActionType } from '../types/ActionType.js';
-import { MeassureType } from "../types/MeassureType.js";
+import { Action } from "../../types/Action.js";
+import { ActionType } from '../../types/ActionType.js';
+import { MeassureType } from "../../types/MeassureType.js";
 import { MovableEntity } from "./MovableEntity.js";
 
 export class Enemy extends MovableEntity {

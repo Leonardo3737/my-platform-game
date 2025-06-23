@@ -1,4 +1,5 @@
-import { MovableEntity } from "../entities/MovableEntity.js"
+
+import { MovableEntity } from '../models/entities/MovableEntity.js'
 import { Action } from './Action.js'
 
 export type MoveEntityData = {

@@ -1,6 +1,6 @@
-import { Entity } from "../entities/Entity.js"
 import { Collisions } from "../enum/Collisions.js"
 import { Game } from "../Game.js"
+import { Entity } from '../models/Entity.js'
 import { CollisionsType } from "../types/CollisionsType.js"
 import { DirectionType } from '../types/DirectionType.js'
 import { MoveEntityData } from "../types/MoveEntityData.js"

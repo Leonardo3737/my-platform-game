@@ -1,7 +1,8 @@
-import { Entity } from "../entities/Entity.js"
-import { MovableEntity } from "../entities/MovableEntity.js"
+
 import { Collisions } from "../enum/Collisions.js"
 import { Game } from "../Game.js"
+import { MovableEntity } from '../models/entities/MovableEntity.js'
+import { Entity } from '../models/Entity.js'
 import { CollisionsType } from "../types/CollisionsType.js"
 import { Collider } from "./Collider.js"
 

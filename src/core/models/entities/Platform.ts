@@ -1,6 +1,6 @@
-import { ScreenSize } from "../constants/ScreenSize.js"
-import { MeassureType } from "../types/MeassureType.js"
-import { Entity } from "./Entity.js"
+import { ScreenSize } from "../../constants/ScreenSize.js"
+import { MeassureType } from "../../types/MeassureType.js"
+import { Entity } from "./../Entity.js"
 
 export class Platform extends Entity {
 
@@ -12,7 +12,7 @@ export class Platform extends Entity {
   ) {
     const auxPosition = {
       x: position.x,
-      y: position.y ?? (ScreenSize.y - size.y)/5
+      y: position.y ?? (ScreenSize.y - size.y) / 5
     }
 
     super(
@@ -22,7 +22,7 @@ export class Platform extends Entity {
       color,
       'platform',
       false
-    )    
+    )
   }
   canMove() {
     return false

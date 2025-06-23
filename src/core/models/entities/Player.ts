@@ -1,7 +1,10 @@
-import { Action } from "../types/Action.js";
-import { ActionType } from '../types/ActionType.js';
-import { DirectionType } from '../types/DirectionType.js';
-import { MeassureType } from "../types/MeassureType.js";
+import { ItemsIcon } from '../../constants/ItemsIcon.js';
+import { Action } from "../../types/Action.js";
+import { ActionType } from '../../types/ActionType.js';
+import { DirectionType } from '../../types/DirectionType.js';
+import { ItemsType } from '../../types/ItemsType.js';
+import { MeassureType } from "../../types/MeassureType.js";
+import { Item } from './../items/Item.js';
 import { MovableEntity } from "./MovableEntity.js";
 import { Tree } from './Tree.js';
 
@@ -11,6 +14,8 @@ export class Player extends MovableEntity {
   points = 0
   isJumping = false
   isTakingDamage = false
+  items: Partial<Record<ItemsType, number>> = {}
+  openInventory = false
 
   actions: Partial<Record<Action, { type: ActionType, run: () => void }>> = {
     top: {
@@ -26,8 +31,12 @@ export class Player extends MovableEntity {
       run: () => this.walk('right'),
     },
     hit: {
-      type: 'hit',
+      type: 'action',
       run: () => this.hit(),
+    },
+    toggleInventory: {
+      type: 'action',
+      run: () => this.toggleInventory(),
     }
   }
 
@@ -98,6 +107,47 @@ export class Player extends MovableEntity {
 
   override mayFall(): boolean {
     return this.usesGravity && !this.isJumping;
+  }
+
+  collectedItem(item: Item) {
+    this.items[ item.itemType ] = (this.items[ item.itemType ] || 0) + 1;
+  }
+
+  toggleInventory() {
+    const inventory = document.getElementById('inventory') as HTMLDivElement;
+
+    if (!inventory) return
+
+    if (this.openInventory) {
+      inventory.style.display = 'none';
+      inventory.innerHTML = '';
+    }
+    else {
+      const renderItems = (item: ItemsType, quantity: number) => `
+      <div class="item">
+      ${ItemsIcon[ item ] || ''}
+      <div class="count">x${quantity}</div>
+      <div class="options">
+        <button>Largar</button>
+      </div>
+    </div>
+      `
+      let hasItems = false;
+      for (let item in this.items) {
+        const itemType = item as ItemsType;
+        const quantity = this.items[ itemType ];
+        if (quantity) {
+          hasItems = true;
+          inventory.innerHTML += renderItems(itemType, quantity);
+        }
+      }
+      if (!hasItems) {
+        inventory.innerHTML = '<div class="empty">Nenhum item coletado</div>';
+      }
+      inventory.style.display = 'grid';
+    }
+
+    this.openInventory = !this.openInventory;
   }
 
 }

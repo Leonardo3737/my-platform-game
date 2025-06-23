@@ -1,7 +1,7 @@
-import { Action } from "../types/Action.js"
-import { ActionType } from '../types/ActionType.js'
-import { DirectionType } from '../types/DirectionType.js'
-import { MeassureType } from "../types/MeassureType.js"
+import { Action } from "../../types/Action.js"
+import { ActionType } from '../../types/ActionType.js'
+import { DirectionType } from '../../types/DirectionType.js'
+import { MeassureType } from "../../types/MeassureType.js"
 import { MovableEntity } from "./MovableEntity.js"
 
 export class MovableObject extends MovableEntity {

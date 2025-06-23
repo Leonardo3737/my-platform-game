@@ -1,10 +1,10 @@
 import { ScreenSize } from "../core/constants/ScreenSize.js"
-import { MovableEntity } from "../core/entities/MovableEntity.js"
-import { MovableObject } from "../core/entities/MovableObject.js"
-import { Platform } from "../core/entities/Platform.js"
-import { Player } from "../core/entities/Player.js"
-import { Tree } from '../core/entities/Tree.js'
 import { Game } from "../core/Game.js"
+import { MovableEntity } from "../core/models/entities/MovableEntity.js"
+import { MovableObject } from "../core/models/entities/MovableObject.js"
+import { Platform } from "../core/models/entities/Platform.js"
+import { Player } from "../core/models/entities/Player.js"
+import { Tree } from '../core/models/entities/Tree.js'
 import { Collider } from "../core/physics/Collider.js"
 import { Gravity } from "../core/physics/Gravity.js"
 import { Control } from "./control.js"
@@ -96,14 +96,16 @@ const game = new Game(
 )
 
 //game.addEntity(enemy)
-game.addEntity(tree)
-game.addEntity(block)
-game.addEntity(block1)
-game.addEntity(block2)
-game.addEntity(block3)
-game.addEntity(platform1)
-game.addEntity(platform2)
-game.addEntity(platform3)
+game.addEntities([
+  tree,
+  block,
+  block1,
+  block2,
+  block3,
+  platform1,
+  platform2,
+  platform3,
+])
 
 const collider = new Collider(game)
 const gravity = new Gravity(game, collider)

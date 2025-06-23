@@ -1,12 +1,16 @@
-import { DirectionType } from '../types/DirectionType.js'
-import { MeassureType } from '../types/MeassureType.js'
-import { Entity } from './Entity.js'
+import { DirectionType } from '../../types/DirectionType.js'
+import { MeassureType } from '../../types/MeassureType.js'
+import { Stick } from '../items/Stick.js'
+import { Entity } from './../Entity.js'
+import { Item } from './../items/Item.js'
 
 export class Tree extends Entity {
   leafColor = '#228B22' // Green color for the leaves
   life = 40
 
-  observersDie: (() => void)[] = []
+  dropItems: Item[] = []
+
+  observersDie: ((dropItems: Item[]) => void)[] = []
 
   constructor(
     body: CanvasRenderingContext2D,
@@ -21,6 +25,18 @@ export class Tree extends Entity {
       false,
       true
     )
+
+    const items = parseInt(`${(Math.random() * 10) + 2}`)
+    for (let index = 0; index < items; index++) {
+      const stick = new Stick(
+        this.body,
+        {
+          x: this.position.x / 5,
+          y: this.position.y / 5 + this.size.y / 5 - 8
+        }
+      )
+      this.dropItems.push(stick)
+    }
   }
 
   render() {
@@ -56,8 +72,6 @@ export class Tree extends Entity {
 
   takeDamage() {
     this.life -= 10
-    console.log(this.life);
-
     this.hideLife()
     if (this.life <= -20) {
       this.hide()
@@ -67,15 +81,16 @@ export class Tree extends Entity {
     }
   }
 
-  subscribeDie(observer: () => void) {
+  subscribeDie(observer: (dropItems: Item[]) => void) {
     this.observersDie.push(observer)
   }
 
   notifyDie() {
-    this.observersDie.forEach(observer => observer())
+    this.observersDie.forEach(observer => observer(this.dropItems))
   }
 
   canMove(direction: DirectionType) {
     return false
   }
+
 }

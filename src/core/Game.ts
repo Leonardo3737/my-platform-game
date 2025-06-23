@@ -1,10 +1,10 @@
-import { Enemy } from "./entities/Enemy.js"
-import { Entity } from "./entities/Entity.js"
-import { Item } from './entities/Item.js'
-import { MovableObject } from "./entities/MovableObject.js"
-import { Player } from "./entities/Player.js"
-import { Tree } from './entities/Tree.js'
 import { Collisions } from "./enum/Collisions.js"
+import { Enemy } from './models/entities/Enemy.js'
+import { MovableObject } from './models/entities/MovableObject.js'
+import { Player } from './models/entities/Player.js'
+import { Tree } from './models/entities/Tree.js'
+import { Entity } from "./models/Entity.js"
+import { Item } from './models/items/Item.js'
 import { Action } from "./types/Action.js"
 import { CollisionsType } from "./types/CollisionsType.js"
 import { DirectionType } from './types/DirectionType.js'
@@ -16,6 +16,9 @@ export class Game {
   entities: Entity[] = []
   cooldownDamage: Record<number, boolean> = {}
   firstRender: boolean
+
+  // indicates whether the game is running
+  idInterval: NodeJS.Timeout | null = null
 
   constructor(
     body: CanvasRenderingContext2D,
@@ -32,7 +35,7 @@ export class Game {
   }
 
   startGame() {
-    setInterval(() => {
+    this.idInterval = setInterval(() => {
       let collidedTree = false
       for (let direction in this.player.collisions) {
 
@@ -86,27 +89,44 @@ export class Game {
 
   onFirstRender(entity: Entity) {
     if (entity instanceof Tree) {
-      entity.subscribeDie(() => {
-        const index = this.entities.findIndex(e => e.id === entity.id)
-        if (index !== -1) {
-          this.entities.splice(index, 1)
-          const stick = new Item(
-            this.body,
-            { x: entity.position.x / 5, y: entity.position.y / 5 + entity.size.y / 5 - 8 }
-          )
-          this.addEntity(stick)
-          //this.updateScreen()
-        }
+      entity.subscribeDie((dropItems: Item[]) => {
+        this.removeEntity(entity)
+        console.log('quantidade de itens: ', dropItems.length);
+
+        this.addEntities(dropItems)
       })
     }
   }
 
   addEntity(entity: Entity) {
     this.entities.push(entity)
-    this.updateScreen()
+  }
+
+  addEntities(entities: Entity[]) {
+    entities.forEach(entity => {
+      this.addEntity(entity)
+    })
+  }
+
+  removeEntity(entity: Entity) {
+    entity.hide()
+    const index = this.entities.findIndex(e => e.id === entity.id)
+    if (index !== -1) {
+      this.entities.splice(index, 1)
+    }
+    for (let direction in this.player.collisions) {
+      this.player.collisions[ direction as DirectionType ].forEach((collision, index) => {
+        const collidedObject = collision.target
+
+        if (collidedObject.id === entity.id) {
+          this.player.collisions[ direction as DirectionType ].splice(index, 1)
+        }
+      })
+    }
   }
 
   onKeyDown(key: string) {
+    if (!this.idInterval) return
     const keyMap: Record<string, Action> = {
       W: 'top',
       A: 'left',
@@ -123,20 +143,36 @@ export class Game {
   onKeyPress(key: string) {
     const keyMap: Record<string, Action> = {
       F: 'hit',
+      E: 'toggleInventory',
     }
     const actionType = keyMap[ key ]
 
+    if (!this.idInterval && actionType !== 'toggleInventory') return
+
     if (actionType && !this.player.isTakingDamage) {
       this.player.runAction(actionType)
+
+      if (actionType === 'toggleInventory') {
+        if (this.idInterval) {
+          clearInterval(this.idInterval)
+          this.idInterval = null
+        } else {
+          this.startGame()
+        }
+      }
     }
   }
 
   notifyCollision(collider: Entity, direction: DirectionType, collisions: CollisionsType) {
+    if (!this.idInterval) return
 
     const collision = collisions[ direction ]
     if (collision instanceof Array && collision.length) {
       collision.map(c => {
-
+        if (collider instanceof Player && c.target instanceof Item) {
+          collider.collectedItem(c.target)
+          this.removeEntity(c.target)
+        }
         // MOVER ENTIDADES MovableObject
         if (c.target instanceof MovableObject && c.collisionType !== Collisions.CONTACT) {
           c.target.runAction(direction)
@@ -155,8 +191,7 @@ export class Game {
 
           c.target.sufferDamage()
           if (!c.target.life) {
-            const index = this.entities.findIndex(e => e.id === c.target.id)
-            this.entities.splice(index, 1)
+            this.removeEntity(c.target)
           }
         }
 
